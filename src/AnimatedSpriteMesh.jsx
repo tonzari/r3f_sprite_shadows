@@ -61,14 +61,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             scaleMultiplier
         )
 
-        let counterX = 0
-        let offsetX = 0
-        let counterY = 1
-        let offsetY = 0
-
         let spriteTileIndex = startFrame
-
-        const emptyTrailingSpacePercent = ((rowCount * columnCount) - endFrame) * ((frameSize.x/mapWidth) / 1.0) + (frameSize.x/mapWidth) / 1.0
 
         const intervalId = window.setInterval(() => {
 
@@ -81,7 +74,8 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             }
 
         }, msPerFrame);
-    
+        
+        // clean up!
         return () => {
           window.clearInterval(intervalId);
         };

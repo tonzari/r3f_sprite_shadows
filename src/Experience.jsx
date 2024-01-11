@@ -41,7 +41,8 @@ export default function Experience(){
                 fps={12}
                 columnCount={8}
                 rowCount={3}
-                endFrame={5}
+                startFrame={5}
+                endFrame={12}
                 loop={false}
                 position={[0.5,0.7,0]}
                 scale={0.6}
