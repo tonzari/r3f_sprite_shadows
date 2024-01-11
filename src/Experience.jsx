@@ -1,25 +1,16 @@
-import * as THREE from 'three'
-import { TextureLoader } from 'three/src/loaders/TextureLoader'
-import { useFrame, useLoader } from '@react-three/fiber'
+import { useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useRef } from 'react'
 import './App.css'
-import Squidward from './Squidward'
+import AnimatedSpriteMesh from './AnimatedSpriteMesh'
 
 export default function Experience(){
 
     const pointLight = useRef()
-    const colorMap = useLoader(TextureLoader, '/drsimi.png')
-    const normalMap = useLoader(TextureLoader, '/drsimi_normal.png')
 
     useFrame((state) => {
         const elapsedTime = state.clock.getElapsedTime()
         pointLight.current.position.x = Math.sin(elapsedTime * 0.2) * 8
-
-        // expirementing with uv offset animation
-        // const vec2 = new THREE.Vector2
-        // vec2.setY(Math.sin(elapsedTime))
-        // colorMap.offset = vec2
     })
 
     return(
@@ -45,23 +36,24 @@ export default function Experience(){
                 shadow-camera-far={ 30 }
             />
 
-            {/* Dr. Simi */}
-            <mesh
-                castShadow
-                position={[0,0.7,0]}
-                >
-                <planeGeometry />
-                <meshStandardMaterial
-                    map={colorMap}
-                    normalMap={normalMap}
-                    side={THREE.DoubleSide}
-                    alphaTest={0.5}
-                />
-            </mesh>
+            <AnimatedSpriteMesh
+                sprite={'/squidward.png'} 
+                fps={12} 
+                columnCount={8} 
+                rowCount={3} 
+                endFrame={18} 
+                position={[0.5,0.7,0]}
+                onClick={()=>{console.log("squidward!")}}
+            />
 
-            <Squidward path={'/squidward.png'} columnCount={8} rowCount={3} frameCount={18} position={[1,0.7,0]}/>
-
-            <Squidward path={'/bmo.png'} columnCount={14} rowCount={1} frameCount={14} position={[-0.6,0.9,0.4]}/>
+            <AnimatedSpriteMesh
+                sprite={'/bmo.png'}
+                fps={24} 
+                columnCount={14} 
+                rowCount={1} 
+                endFrame={14} 
+                position={[-0.3,0.9,0.4]}
+            />
 
             <mesh
                 castShadow

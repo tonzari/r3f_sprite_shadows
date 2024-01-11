@@ -8,8 +8,6 @@ import Experience from './Experience'
 
 function App() {
 
-  const colorMap = useLoader(TextureLoader, 'public/drsimi.png')
-
   return <>
     <Canvas
       shadows

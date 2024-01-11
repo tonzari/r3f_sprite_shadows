@@ -3,9 +3,11 @@ import { useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
 import { useEffect, useRef } from 'react'
 
-export default function Squidward({path, columnCount, rowCount, frameCount, msPerFrame = 83.3, ...props}) {
-    const colorMap = useLoader(TextureLoader, path)
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, endFrame, fps = 12, ...props}) {
+    const colorMap = useLoader(TextureLoader, sprite)
     const plane = useRef()
+
+    const msPerFrame = 1000 / fps
 
     const mapHeight = colorMap.source.data.height
     const mapWidth = colorMap.source.data.width
@@ -22,7 +24,7 @@ export default function Squidward({path, columnCount, rowCount, frameCount, msPe
         colorMap.wrapt = THREE.RepeatWrapping
         colorMap.repeat.set(1/columnCount,1/rowCount)
 
-        const scaleMultiplier = 0.6
+        const scaleMultiplier = props.scale ? props.scale : 0.6
         
         plane.current.scale.set(
             scaleMultiplier,
@@ -35,8 +37,8 @@ export default function Squidward({path, columnCount, rowCount, frameCount, msPe
         let counterY = 1
         let offsetY = 0
 
-        const ignoreSpacePercentage = ((rowCount * columnCount) - frameCount) * ((frameSize.x/mapWidth) / 1.0) + (frameSize.x/mapWidth) / 1.0
-        console.log(ignoreSpacePercentage)
+        const ignoreSpacePercentage = ((rowCount * columnCount) - endFrame) * ((frameSize.x/mapWidth) / 1.0) + (frameSize.x/mapWidth) / 1.0
+
         const intervalId = window.setInterval(() => {
 
             // uv offset animation
@@ -48,11 +50,10 @@ export default function Squidward({path, columnCount, rowCount, frameCount, msPe
             offsetPercentVec2.setY(offsetY)
             colorMap.offset = offsetPercentVec2
 
-            console.log(offsetPercentVec2)
-
             counterX++
 
-            if(offsetX >= 1.0 - frameSize.x/mapWidth) { // if on last column of any row
+            // if on last column of any row
+            if(offsetX >= 1.0 - frameSize.x/mapWidth) { 
                 
                 if(counterY <= rowCount) {
                     counterY++
@@ -63,7 +64,8 @@ export default function Squidward({path, columnCount, rowCount, frameCount, msPe
                 }
                 
                 counterX = 0
-            } else if(counterY == rowCount && offsetX >= 1.0 - ignoreSpacePercentage) { // if on last row and beyond last frame of grid
+            // if on last row and beyond last frame of grid
+            } else if(counterY == rowCount && offsetX >= 1.0 - ignoreSpacePercentage) { 
                 counterY = 1
                 counterX = 0  
             }
@@ -80,7 +82,7 @@ export default function Squidward({path, columnCount, rowCount, frameCount, msPe
             <mesh
                 ref={plane}
                 castShadow
-                position={props.position}
+                {...props}
             >
                 <planeGeometry />
                 <meshStandardMaterial
