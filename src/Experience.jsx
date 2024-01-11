@@ -37,22 +37,25 @@ export default function Experience(){
             />
 
             <AnimatedSpriteMesh
-                sprite={'/squidward.png'} 
-                fps={12} 
-                columnCount={8} 
-                rowCount={3} 
-                endFrame={18} 
+                sprite={'/squidward.png'}
+                fps={12}
+                columnCount={8}
+                rowCount={3}
+                endFrame={5}
+                loop={false}
                 position={[0.5,0.7,0]}
+                scale={0.6}
                 onClick={()=>{console.log("squidward!")}}
             />
 
             <AnimatedSpriteMesh
                 sprite={'/bmo.png'}
-                fps={24} 
-                columnCount={14} 
-                rowCount={1} 
-                endFrame={14} 
+                fps={24}
+                columnCount={14}
+                rowCount={1}
+                endFrame={14}
                 position={[-0.3,0.9,0.4]}
+                scale={0.6}
             />
 
             <mesh

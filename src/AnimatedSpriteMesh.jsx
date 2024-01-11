@@ -3,7 +3,35 @@ import { useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
 import { useEffect, useRef } from 'react'
 
-export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, endFrame, fps = 12, ...props}) {
+function getSpriteTileCoords(frameNumber, rows, columns) {
+    let result = new THREE.Vector2
+
+    // Convert framePosition to zero-index
+    const index = frameNumber - 1;
+
+    // Calculate row and column (0-indexed)
+    const row = Math.floor(index / columns);
+    const column = index % columns;
+
+    // Calculate the size of each tile in percentages
+    const tileSizeWidth = 100 / columns;
+    const tileSizeHeight = 100 / rows;
+
+    // Calculate coordinates
+    // For x, it's straightforward as the origin is at the bottom left
+    const x = column * tileSizeWidth / 100;
+
+    // For y, we need to invert the row as the origin is at the bottom
+    const y = (rows - 1 - row) * tileSizeHeight / 100;
+
+    result.setX(x)
+    result.setY(y)
+
+    return result
+}
+
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, ...props}) {
+    
     const colorMap = useLoader(TextureLoader, sprite)
     const plane = useRef()
 
@@ -20,12 +48,13 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, endFr
     const ratioHeightToWidth = frameSize.y/frameSize.x
 
     useEffect(() => {
+        // crop and allow looping/wrapping
         colorMap.wrapS = THREE.RepeatWrapping
         colorMap.wrapt = THREE.RepeatWrapping
         colorMap.repeat.set(1/columnCount,1/rowCount)
 
-        const scaleMultiplier = props.scale ? props.scale : 0.6
-        
+        // If user passed a scale, use it
+        const scaleMultiplier = props.scale ? props.scale : 1
         plane.current.scale.set(
             scaleMultiplier,
             scaleMultiplier * ratioHeightToWidth,
@@ -37,39 +66,19 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, endFr
         let counterY = 1
         let offsetY = 0
 
-        const ignoreSpacePercentage = ((rowCount * columnCount) - endFrame) * ((frameSize.x/mapWidth) / 1.0) + (frameSize.x/mapWidth) / 1.0
+        let spriteTileIndex = startFrame
+
+        const emptyTrailingSpacePercent = ((rowCount * columnCount) - endFrame) * ((frameSize.x/mapWidth) / 1.0) + (frameSize.x/mapWidth) / 1.0
 
         const intervalId = window.setInterval(() => {
 
-            // uv offset animation
-            const offsetPercentVec2 = new THREE.Vector2
-            offsetX = (frameSize.x/mapWidth) * counterX / 1.0
-            offsetY = 1.0 - (counterY/rowCount)
-
-            offsetPercentVec2.setX(offsetX)
-            offsetPercentVec2.setY(offsetY)
-            colorMap.offset = offsetPercentVec2
-
-            counterX++
-
-            // if on last column of any row
-            if(offsetX >= 1.0 - frameSize.x/mapWidth) { 
-                
-                if(counterY <= rowCount) {
-                    counterY++
-                }
-
-                if(offsetY <= 0) {
-                    counterY = 1
-                }
-                
-                counterX = 0
-            // if on last row and beyond last frame of grid
-            } else if(counterY == rowCount && offsetX >= 1.0 - ignoreSpacePercentage) { 
-                counterY = 1
-                counterX = 0  
+            colorMap.offset = getSpriteTileCoords(spriteTileIndex, rowCount, columnCount)
+            
+            if(spriteTileIndex < endFrame) {
+                spriteTileIndex++
+            } else if(loop) {
+                spriteTileIndex = 1
             }
-
 
         }, msPerFrame);
     
