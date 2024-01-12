@@ -7,9 +7,10 @@ import AnimatedSpriteMesh from './AnimatedSpriteMesh'
 export default function Experience(){
 
     const pointLight = useRef()
+    let elapsedTime = 0
 
     useFrame((state) => {
-        const elapsedTime = state.clock.getElapsedTime()
+        elapsedTime = state.clock.getElapsedTime()
         pointLight.current.position.x = Math.sin(elapsedTime * 0.2) * 8
     })
 

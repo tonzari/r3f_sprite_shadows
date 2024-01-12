@@ -1,36 +1,9 @@
 import * as THREE from 'three'
-import { useLoader } from "@react-three/fiber"
+import { useFrame, useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
 import { useEffect, useRef } from 'react'
 
-function getSpriteTileCoords(frameNumber, rows, columns) {
-    let result = new THREE.Vector2
-
-    // Convert framePosition to zero-index
-    const index = frameNumber - 1;
-
-    // Calculate row and column (0-indexed)
-    const row = Math.floor(index / columns);
-    const column = index % columns;
-
-    // Calculate the size of each tile in percentages
-    const tileSizeWidth = 100 / columns;
-    const tileSizeHeight = 100 / rows;
-
-    // Calculate coordinates
-    // For x, it's straightforward as the origin is at the bottom left
-    const x = column * tileSizeWidth / 100;
-
-    // For y, we need to invert the row as the origin is at the bottom
-    const y = (rows - 1 - row) * tileSizeHeight / 100;
-
-    result.setX(x)
-    result.setY(y)
-
-    return result
-}
-
-export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, ...props}) {
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, lookAtCam = false, ...props}) {
     
     const colorMap = useLoader(TextureLoader, sprite)
     const plane = useRef()
@@ -81,6 +54,12 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         };
       }, []);
 
+      useFrame((state) => {
+        if(lookAtCam) {
+            plane.current.lookAt(state.camera.position)
+        }
+      })
+
     return <>
             <mesh
                 ref={plane}
@@ -95,4 +74,31 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
                 />
             </mesh>
     </>
+}
+
+function getSpriteTileCoords(frameNumber, rows, columns) {
+    let result = new THREE.Vector2
+
+    // Convert framePosition to zero-index
+    const index = frameNumber - 1;
+
+    // Calculate row and column (0-indexed)
+    const row = Math.floor(index / columns);
+    const column = index % columns;
+
+    // Calculate the size of each tile in percentages
+    const tileSizeWidth = 1 / columns;
+    const tileSizeHeight = 1 / rows;
+
+    // Calculate coordinates
+    // For x, it's straightforward as the origin is at the bottom left
+    const x = column * tileSizeWidth;
+
+    // For y, we need to invert the row as the origin is at the bottom
+    const y = (rows - 1 - row) * tileSizeHeight;
+
+    result.setX(x)
+    result.setY(y)
+
+    return result
 }

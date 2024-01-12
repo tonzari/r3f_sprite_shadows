@@ -1,8 +1,4 @@
-import * as THREE from 'three'
-import { TextureLoader } from 'three/src/loaders/TextureLoader'
-import { Canvas, useFrame, useLoader } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
-import { useRef } from 'react'
+import { Canvas } from '@react-three/fiber'
 import './App.css'
 import Experience from './Experience'
 
@@ -10,6 +6,7 @@ function App() {
 
   return <>
     <Canvas
+      camera={{near:0.5, far:10}}
       shadows
       gl={{ preserveDrawingBuffer: true }}
       eventSource={document.getElementById('root')}
