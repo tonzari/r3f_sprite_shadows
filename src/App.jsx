@@ -6,7 +6,7 @@ function App() {
 
   return <>
     <Canvas
-      camera={{near:0.5, far:10}}
+      camera={{near:0.01, far:10}}
       shadows
       gl={{ preserveDrawingBuffer: true }}
       eventSource={document.getElementById('root')}

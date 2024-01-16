@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import { useFrame, useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, lookAtCam = false, ...props}) {
     
@@ -19,6 +19,17 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         }
 
     const ratioHeightToWidth = frameSize.y/frameSize.x
+
+    const [isPlaying, setIsPlaying] = useState(false)
+
+    function play() {
+        setIsPlaying(true)
+    }
+
+    function handleClick() {
+        console.log("clicked")
+        play()
+    }
 
     useEffect(() => {
         // crop and allow looping/wrapping
@@ -38,12 +49,15 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
         const intervalId = window.setInterval(() => {
 
-            colorMap.offset = getSpriteTileCoords(spriteTileIndex, rowCount, columnCount)
-            
-            if(spriteTileIndex < endFrame) {
-                spriteTileIndex++
-            } else if(loop) {
-                spriteTileIndex = 1
+            if(isPlaying) {
+                if(spriteTileIndex < endFrame) {
+                    colorMap.offset = getSpriteTileCoords(spriteTileIndex, rowCount, columnCount)
+                    spriteTileIndex++
+                } else if(loop) {
+                    spriteTileIndex = 1
+                } else {
+                    setIsPlaying(false)
+                }
             }
 
         }, msPerFrame);
@@ -52,7 +66,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         return () => {
           window.clearInterval(intervalId);
         };
-      }, []);
+      }, [isPlaying]);
 
       useFrame((state) => {
         if(lookAtCam) {
@@ -65,6 +79,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
                 ref={plane}
                 castShadow
                 {...props}
+                onClick={handleClick}
             >
                 <planeGeometry />
                 <meshStandardMaterial
@@ -76,7 +91,10 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     </>
 }
 
+
+
 function getSpriteTileCoords(frameNumber, rows, columns) {
+    console.log("hello")
     let result = new THREE.Vector2
 
     // Convert framePosition to zero-index

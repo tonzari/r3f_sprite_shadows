@@ -1,21 +1,28 @@
 import { useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useRef } from 'react'
+import { Perf } from 'r3f-perf'
 import './App.css'
 import AnimatedSpriteMesh from './AnimatedSpriteMesh'
+import { PerspectiveCamera } from 'three'
 
 export default function Experience(){
 
     const pointLight = useRef()
+    const pointLight2 = useRef()
+
     let elapsedTime = 0
 
     useFrame((state) => {
         elapsedTime = state.clock.getElapsedTime()
         pointLight.current.position.x = Math.sin(elapsedTime * 0.2) * 8
+        pointLight2.current.position.x = Math.sin(elapsedTime * 0.1) * 4
     })
 
     return(
         <>
+            <Perf />
+
             <OrbitControls />
 
             <directionalLight 
@@ -32,6 +39,17 @@ export default function Experience(){
                 color={"white"}
                 intensity={50}
                 position={[-5,4,5]}
+                shadow-mapSize={2048}
+                shadow-camera-near={ 1 }
+                shadow-camera-far={ 30 }
+            />
+
+            <pointLight
+                ref={pointLight2}
+                castShadow
+                color={"white"}
+                intensity={50}
+                position={[-5,4,-4]}
                 shadow-mapSize={2048}
                 shadow-camera-near={ 1 }
                 shadow-camera-far={ 30 }
@@ -58,12 +76,44 @@ export default function Experience(){
                 endFrame={14}
                 position={[-0.3,0.9,0.4]}
                 scale={0.6}
+
+            />
+
+            <AnimatedSpriteMesh
+                sprite={'/procreateTest.png'}
+                fps={24}
+                columnCount={6}
+                rowCount={10}
+                endFrame={59}
+                position={[2,2,-1]}
+                scale={2}
+            />
+
+            <AnimatedSpriteMesh
+                sprite={'/SpriteSheetx0.2/procreateTest.png'}
+                fps={24}
+                columnCount={10}
+                rowCount={6}
+                endFrame={59}
+                position={[0,2,-1]}
+                scale={2}
+            />
+
+            <AnimatedSpriteMesh
+                sprite={'/SpriteSheetx0.5/procreateTest.png'}
+                fps={24}
+                columnCount={4}
+                rowCount={15}
+                endFrame={59}
+                position={[-2,2,-1]}
+                scale={2}
+                onClick={()=>{}}
             />
 
             <mesh
                 castShadow
                 receiveShadow
-                scale={5}
+                scale={8}
                 rotation={[-Math.PI/2,0,0]}
             >
                 <planeGeometry />
@@ -83,7 +133,17 @@ export default function Experience(){
             <mesh
                 castShadow
                 receiveShadow
-                position={[0,0,-.5]}
+                position={[0,-1,-.5]}
+                scale={[5,5,0.4]}
+            >
+                <boxGeometry />
+                <meshStandardMaterial color={"white"}/>
+            </mesh>
+
+            <mesh
+                castShadow
+                receiveShadow
+                position={[0,4.6,-.5]}
                 scale={[5,5,0.4]}
             >
                 <boxGeometry />
