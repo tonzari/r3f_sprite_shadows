@@ -3,7 +3,7 @@ import { useFrame, useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
 import { useEffect, useRef, useState } from 'react'
 
-export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, lookAtCam = false, ...props}) {
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, lookAtCam = false, ...props}) {
     
     const colorMap = useLoader(TextureLoader, sprite)
     const plane = useRef()
@@ -20,15 +20,15 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
     const ratioHeightToWidth = frameSize.y/frameSize.x
 
-    const [isPlaying, setIsPlaying] = useState(false)
+    const [isPlaying, setIsPlaying] = useState(playOnLoad)
 
     function play() {
         setIsPlaying(true)
     }
 
-    function handleClick() {
-        console.log("clicked")
-        play()
+    function handleClick(e) {
+        if(clickToPlay) { play() }
+        if(props.onClick) { props.onClick(e) }
     }
 
     useEffect(() => {
@@ -36,9 +36,11 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         colorMap.wrapS = THREE.RepeatWrapping
         colorMap.wrapt = THREE.RepeatWrapping
         colorMap.repeat.set(1/columnCount,1/rowCount)
+        colorMap.offset = getSpriteTileCoords(startFrame, rowCount, columnCount)
 
         // If user passed a scale, use it
         const scaleMultiplier = props.scale ? props.scale : 1
+        
         plane.current.scale.set(
             scaleMultiplier,
             scaleMultiplier * ratioHeightToWidth,
@@ -94,7 +96,6 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
 
 function getSpriteTileCoords(frameNumber, rows, columns) {
-    console.log("hello")
     let result = new THREE.Vector2
 
     // Convert framePosition to zero-index

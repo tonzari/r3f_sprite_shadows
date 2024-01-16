@@ -66,6 +66,7 @@ export default function Experience(){
                 position={[0.5,0.7,0]}
                 scale={0.6}
                 onClick={()=>{console.log("squidward!")}}
+                clickToPlay
             />
 
             <AnimatedSpriteMesh
@@ -76,7 +77,9 @@ export default function Experience(){
                 endFrame={14}
                 position={[-0.3,0.9,0.4]}
                 scale={0.6}
-
+                clickToPlay
+                playOnLoad={false}
+                loop={false}
             />
 
             <AnimatedSpriteMesh
@@ -87,6 +90,9 @@ export default function Experience(){
                 endFrame={59}
                 position={[2,2,-1]}
                 scale={2}
+                loop={false}
+                playOnLoad={false}
+                clickToPlay
             />
 
             <AnimatedSpriteMesh
@@ -97,6 +103,9 @@ export default function Experience(){
                 endFrame={59}
                 position={[0,2,-1]}
                 scale={2}
+                loop={false}
+                playOnLoad={false}
+                clickToPlay
             />
 
             <AnimatedSpriteMesh
@@ -107,6 +116,9 @@ export default function Experience(){
                 endFrame={59}
                 position={[-2,2,-1]}
                 scale={2}
+                playOnLoad={false}
+                clickToPlay
+                loop={false}
                 onClick={()=>{}}
             />
 
