@@ -5,13 +5,13 @@ import { useEffect, useRef, useState } from 'react'
 
 export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, lookAtCam = false, ...props}) {
     
-    const colorMap = useLoader(TextureLoader, sprite)
+    const texture = useLoader(TextureLoader, sprite)
     const plane = useRef()
 
     const msPerFrame = 1000 / fps
 
-    const mapHeight = colorMap.source.data.height
-    const mapWidth = colorMap.source.data.width
+    const mapHeight = texture.source.data.height
+    const mapWidth = texture.source.data.width
 
     const frameSize = {
             x: mapWidth / columnCount, 
@@ -31,12 +31,12 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         if(props.onClick) { props.onClick(e) }
     }
 
+    // init
     useEffect(() => {
         // crop and allow looping/wrapping
-        colorMap.wrapS = THREE.RepeatWrapping
-        colorMap.wrapt = THREE.RepeatWrapping
-        colorMap.repeat.set(1/columnCount,1/rowCount)
-        colorMap.offset = getSpriteTileCoords(startFrame, rowCount, columnCount)
+        texture.wrapS = THREE.RepeatWrapping
+        texture.wrapt = THREE.RepeatWrapping
+        texture.repeat.set(1/columnCount,1/rowCount)
 
         // If user passed a scale, use it
         const scaleMultiplier = props.scale ? props.scale : 1
@@ -46,28 +46,30 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             scaleMultiplier * ratioHeightToWidth,
             scaleMultiplier
         )
+      }, []);
 
-        let spriteTileIndex = startFrame
+      // update on isPlaying state change
+      useEffect(() => {
+        texture.offset = getSpriteTileCoords(startFrame, rowCount, columnCount)
+
+        let currentFrame = startFrame
 
         const intervalId = window.setInterval(() => {
-
             if(isPlaying) {
-                if(spriteTileIndex < endFrame) {
-                    colorMap.offset = getSpriteTileCoords(spriteTileIndex, rowCount, columnCount)
-                    spriteTileIndex++
+                if(currentFrame < endFrame) {
+                    texture.offset = getSpriteTileCoords(currentFrame, rowCount, columnCount)
+                    currentFrame++
                 } else if(loop) {
-                    spriteTileIndex = 1
+                    currentFrame = 1
                 } else {
                     setIsPlaying(false)
                 }
             }
-
         }, msPerFrame);
         
-        // clean up!
         return () => {
-          window.clearInterval(intervalId);
-        };
+          window.clearInterval(intervalId); // clean up!
+        }
       }, [isPlaying]);
 
       useFrame((state) => {
@@ -85,7 +87,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             >
                 <planeGeometry />
                 <meshStandardMaterial
-                    map={colorMap}
+                    map={texture}
                     side={THREE.DoubleSide}
                     alphaTest={0.5}
                 />
@@ -99,22 +101,22 @@ function getSpriteTileCoords(frameNumber, rows, columns) {
     let result = new THREE.Vector2
 
     // Convert framePosition to zero-index
-    const index = frameNumber - 1;
+    const index = frameNumber - 1
 
     // Calculate row and column (0-indexed)
-    const row = Math.floor(index / columns);
-    const column = index % columns;
+    const row = Math.floor(index / columns)
+    const column = index % columns
 
     // Calculate the size of each tile in percentages
-    const tileSizeWidth = 1 / columns;
-    const tileSizeHeight = 1 / rows;
+    const tileSizeWidth = 1 / columns
+    const tileSizeHeight = 1 / rows
 
     // Calculate coordinates
     // For x, it's straightforward as the origin is at the bottom left
-    const x = column * tileSizeWidth;
+    const x = column * tileSizeWidth
 
     // For y, we need to invert the row as the origin is at the bottom
-    const y = (rows - 1 - row) * tileSizeHeight;
+    const y = (rows - 1 - row) * tileSizeHeight
 
     result.setX(x)
     result.setY(y)
