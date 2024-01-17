@@ -1,6 +1,6 @@
 import { useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
-import { useRef } from 'react'
+import { Suspense, useRef } from 'react'
 import { Perf } from 'r3f-perf'
 import './App.css'
 import AnimatedSpriteMesh from './AnimatedSpriteMesh'
@@ -55,72 +55,81 @@ export default function Experience(){
                 shadow-camera-far={ 30 }
             />
 
-            <AnimatedSpriteMesh
-                sprite={'/squidward.png'}
-                fps={12}
-                columnCount={8}
-                rowCount={3}
-                startFrame={5}
-                endFrame={12}
-                loop={false}
-                position={[0.5,0.7,0]}
-                scale={0.6}
-                onClick={()=>{console.log("squidward!")}}
-                clickToPlay
-            />
+            <Suspense>
+                <AnimatedSpriteMesh
+                    sprite={'/squidward.png'}
+                    fps={12}
+                    columnCount={8}
+                    rowCount={3}
+                    startFrame={1}
+                    endFrame={18}
+                    loop={false}
+                    position={[0.5,0.7,0]}
+                    scale={0.6}
+                    onClick={()=>{console.log("squidward!")}}
+                    clickToPlay
+                />
+            </Suspense>
 
-            <AnimatedSpriteMesh
-                sprite={'/bmo.png'}
-                fps={24}
-                columnCount={14}
-                rowCount={1}
-                endFrame={14}
-                position={[-0.3,0.9,0.4]}
-                scale={0.6}
-                clickToPlay
-                playOnLoad={false}
-                loop={false}
-            />
+            <Suspense>
+                <AnimatedSpriteMesh
+                    sprite={'/bmo.png'}
+                    fps={24}
+                    columnCount={14}
+                    rowCount={1}
+                    endFrame={14}
+                    position={[-0.3,0.9,0.4]}
+                    scale={0.6}
+                    clickToPlay
+                    playOnLoad={false}
+                    loop={false}
+                />
+            </Suspense>
+            <Suspense>
+                <AnimatedSpriteMesh
+                    sprite={'/procreateTest.png'}
+                    fps={24}
+                    columnCount={6}
+                    rowCount={10}
+                    endFrame={59}
+                    position={[2,2,-1]}
+                    scale={2}
+                    loop={false}
+                    playOnLoad={false}
+                    clickToPlay
+                />
+            </Suspense>
+            <Suspense>
+                <AnimatedSpriteMesh
+                    sprite={'/SpriteSheetx0.2/procreateTest.png'}
+                    fps={24}
+                    columnCount={10}
+                    rowCount={6}
+                    endFrame={59}
+                    position={[0,2,-1]}
+                    scale={2}
+                    loop={false}
+                    playOnLoad={false}
+                    clickToPlay
+                />
+            </Suspense>
 
-            <AnimatedSpriteMesh
-                sprite={'/procreateTest.png'}
-                fps={24}
-                columnCount={6}
-                rowCount={10}
-                endFrame={59}
-                position={[2,2,-1]}
-                scale={2}
-                loop={false}
-                playOnLoad={false}
-                clickToPlay
-            />
-
-            <AnimatedSpriteMesh
-                sprite={'/SpriteSheetx0.2/procreateTest.png'}
-                fps={24}
-                columnCount={10}
-                rowCount={6}
-                endFrame={59}
-                position={[0,2,-1]}
-                scale={2}
-                loop={false}
-                playOnLoad={false}
-                clickToPlay
-            />
-
-            <AnimatedSpriteMesh
-                sprite={'/SpriteSheetx0.5/procreateTest.png'}
-                fps={24}
-                columnCount={4}
-                rowCount={15}
-                endFrame={59}
-                position={[-2,2,-1]}
-                scale={2}
-                playOnLoad={false}
-                clickToPlay
-                loop={false}
-                onClick={()=>{}}
-            />
+            <Suspense>
+                <AnimatedSpriteMesh
+                    sprite={'/SpriteSheetx0.5/procreateTest.png'}
+                    fps={24}
+                    columnCount={4}
+                    rowCount={15}
+                    endFrame={59}
+                    position={[-2,2,-1]}
+                    scale={2}
+                    playOnLoad={false}
+                    clickToPlay
+                    loop={false}
+                    onClick={()=>{}}
+                />
+            </Suspense>
+             
 
             <mesh
                 castShadow

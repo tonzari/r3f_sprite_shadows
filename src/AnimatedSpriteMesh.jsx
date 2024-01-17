@@ -38,7 +38,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         texture.wrapt = THREE.RepeatWrapping
         texture.repeat.set(1/columnCount,1/rowCount)
 
-        // If user passed a scale, use it
+        // If parent passed a scale, use it
         const scaleMultiplier = props.scale ? props.scale : 1
         
         plane.current.scale.set(
@@ -54,18 +54,25 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
         let currentFrame = startFrame
 
-        const intervalId = window.setInterval(() => {
-            if(isPlaying) {
-                if(currentFrame < endFrame) {
-                    texture.offset = getSpriteTileCoords(currentFrame, rowCount, columnCount)
-                    currentFrame++
-                } else if(loop) {
-                    currentFrame = 1
-                } else {
-                    setIsPlaying(false)
-                }
+        const updateFrame = () => {
+            if (!isPlaying) return;
+        
+            if (currentFrame < endFrame) {
+                texture.offset = getSpriteTileCoords(currentFrame, rowCount, columnCount)
+                currentFrame++;
+                return;
             }
-        }, msPerFrame);
+        
+            if (loop) {
+                currentFrame = startFrame;
+                return;
+            }
+        
+            setIsPlaying(false);
+        }
+        
+
+        const intervalId = window.setInterval(updateFrame, msPerFrame);
         
         return () => {
           window.clearInterval(intervalId); // clean up!
@@ -78,21 +85,18 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         }
       })
 
-    return <>
-            <mesh
-                ref={plane}
-                castShadow
-                {...props}
-                onClick={handleClick}
-            >
-                <planeGeometry />
-                <meshStandardMaterial
-                    map={texture}
-                    side={THREE.DoubleSide}
-                    alphaTest={0.5}
-                />
-            </mesh>
-    </>
+    return (
+      <>
+        <mesh ref={plane} castShadow {...props} onClick={handleClick}>
+        <planeGeometry />
+        <meshStandardMaterial
+            map={texture}
+            side={THREE.DoubleSide}
+            alphaTest={0.5}
+        />
+        </mesh>
+      </>
+    );
 }
 
 
