@@ -1,42 +1,68 @@
 import * as THREE from 'three'
 import { useFrame, useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
-export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, lookAtCam = false, ...props}) {
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, lookAtCam = false, alphaTest = 0.5, ...props}) {
+    
+    // VARIABLES - - - - - - - - - - - - - - - - - - - - 
     
     const texture = useLoader(TextureLoader, sprite)
     const plane = useRef()
 
     const msPerFrame = 1000 / fps
 
-    const mapHeight = texture.source.data.height
-    const mapWidth = texture.source.data.width
+    const textureHeight = texture.source.data.height
+    const textureWidth = texture.source.data.width
 
     const frameSize = {
-            x: mapWidth / columnCount, 
-            y: mapHeight / rowCount
-        }
+        x: textureWidth / columnCount, 
+        y: textureHeight / rowCount
+    }
 
     const ratioHeightToWidth = frameSize.y/frameSize.x
 
-    const [isPlaying, setIsPlaying] = useState(playOnLoad)
+    let isPlaying = playOnLoad
+    let currentFrame = startFrame
+    let nextFrameTime = 0
+    
+    // FUNCTIONS - - - - - - - - - - - - - - - - - - - - 
 
     function play() {
-        setIsPlaying(true)
+        isPlaying = true
+        currentFrame = startFrame
     }
 
     function handleClick(e) {
-        if(clickToPlay) { play() }
+        if(clickToPlay && !isPlaying) { play() }
         if(props.onClick) { props.onClick(e) }
     }
 
+    function UpdateFrame() {       
+        texture.offset = getSpriteOffsetVec2(currentFrame, rowCount, columnCount)
+        
+        if (currentFrame < endFrame) {
+            currentFrame++
+            return
+        }
+    
+        if (loop) {
+            currentFrame = startFrame
+            return
+        }
+        
+        isPlaying = false
+    }
+
+    // HOOKS - - - - - - - - - - - - - - - - - - - - - - 
+
     // init
     useEffect(() => {
-        // crop and allow looping/wrapping
+        // enable wrapping, crop, set first frame
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapt = THREE.RepeatWrapping
         texture.repeat.set(1/columnCount,1/rowCount)
+        texture.offset = getSpriteOffsetVec2(startFrame, rowCount, columnCount)
 
         // If parent passed a scale, use it
         const scaleMultiplier = props.scale ? props.scale : 1
@@ -46,54 +72,35 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             scaleMultiplier * ratioHeightToWidth,
             scaleMultiplier
         )
-      }, []);
-
-      // update on isPlaying state change
-      useEffect(() => {
-        texture.offset = getSpriteTileCoords(startFrame, rowCount, columnCount)
-
-        let currentFrame = startFrame
-
-        const updateFrame = () => {
-            if (!isPlaying) return;
+    }, []);
         
-            if (currentFrame < endFrame) {
-                texture.offset = getSpriteTileCoords(currentFrame, rowCount, columnCount)
-                currentFrame++;
-                return;
-            }
-        
-            if (loop) {
-                currentFrame = startFrame;
-                return;
-            }
-        
-            setIsPlaying(false);
-        }
-        
-
-        const intervalId = window.setInterval(updateFrame, msPerFrame);
-        
-        return () => {
-          window.clearInterval(intervalId); // clean up!
-        }
-      }, [isPlaying]);
-
-      useFrame((state) => {
+    useFrame((state) => {
         if(lookAtCam) {
             plane.current.lookAt(state.camera.position)
         }
-      })
+
+        if(!isPlaying) return 
+
+        if(window.performance.now() >= nextFrameTime) {
+            UpdateFrame()
+            nextFrameTime = window.performance.now() + msPerFrame
+        }
+    })
 
     return (
       <>
-        <mesh ref={plane} castShadow {...props} onClick={handleClick}>
-        <planeGeometry />
-        <meshStandardMaterial
-            map={texture}
-            side={THREE.DoubleSide}
-            alphaTest={0.5}
-        />
+        <mesh 
+            ref={plane} 
+            castShadow 
+            {...props} 
+            onClick={handleClick}
+        >
+            <planeGeometry />
+            <meshStandardMaterial
+                map={texture}
+                side={THREE.DoubleSide}
+                alphaTest={alphaTest}
+            />
         </mesh>
       </>
     );
@@ -101,7 +108,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
 
 
-function getSpriteTileCoords(frameNumber, rows, columns) {
+function getSpriteOffsetVec2(frameNumber, rows, columns) {
     let result = new THREE.Vector2
 
     // Convert framePosition to zero-index
