@@ -3,7 +3,7 @@ import { useFrame, useLoader } from "@react-three/fiber"
 import { TextureLoader } from "three"
 import { useEffect, useRef } from 'react'
 
-export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, lookAtCam = false, alphaTest = 0.5, ...props}) {
+export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, allowRetrigger = false, lookAtCam = false, alphaTest = 0.5, ...props}) {
     
     // VARIABLES - - - - - - - - - - - - - - - - - - - - 
     
@@ -18,10 +18,18 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     }
     const ratioHeightToWidth = frameSize.y/frameSize.x
     const spriteTileCoords = new THREE.Vector2()
+    const scaleMultiplier = props.scale ? props.scale : 1
 
     let isPlaying = playOnLoad
     let currentFrame = startFrame
     let nextFrameTime = 0
+
+    // enable wrapping, crop, set first frame
+    texture.wrapS = THREE.RepeatWrapping
+    texture.wrapt = THREE.RepeatWrapping
+    texture.repeat.set(1/columnCount,1/rowCount)
+    texture.offset = getSpriteOffsetVec2(spriteTileCoords, startFrame, rowCount, columnCount)
+    
     
     // FUNCTIONS - - - - - - - - - - - - - - - - - - - - 
 
@@ -31,11 +39,11 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     }
 
     function handleClick(e) {
-        if(clickToPlay && !isPlaying) { play() }
+        if(clickToPlay && allowRetrigger || !isPlaying) { play() }
         if(props.onClick) { props.onClick(e) }
     }
 
-    function UpdateFrame() {  
+    function UpdateSpriteFrame() {  
         texture.offset = getSpriteOffsetVec2(spriteTileCoords, currentFrame, rowCount, columnCount)
         
         if (currentFrame < endFrame) {
@@ -55,32 +63,22 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
     // init
     useEffect(() => {
-        // enable wrapping, crop, set first frame
-        texture.wrapS = THREE.RepeatWrapping
-        texture.wrapt = THREE.RepeatWrapping
-        texture.repeat.set(1/columnCount,1/rowCount)
-        texture.offset = getSpriteOffsetVec2(spriteTileCoords, startFrame, rowCount, columnCount)
-
-        // If parent passed a scale, use it
-        const scaleMultiplier = props.scale ? props.scale : 1
-        
         plane.current.scale.set(
             scaleMultiplier,
             scaleMultiplier * ratioHeightToWidth,
             scaleMultiplier
         )
     }, []);
-        
+    
+    // update loop
     useFrame((state) => {
         if(lookAtCam) {
             plane.current.lookAt(state.camera.position)
         }
 
-        if(!isPlaying) return
-
         // Determine frame rate indepent time to update sprite 
-        if(window.performance.now() >= nextFrameTime) {
-            UpdateFrame()
+        if(isPlaying && window.performance.now() >= nextFrameTime) {
+            UpdateSpriteFrame()
             nextFrameTime = window.performance.now() + msPerFrame
         }
     })
@@ -130,6 +128,7 @@ function getSpriteOffsetVec2(reusableVec2, frameNumber, rows, columns) {
     // For y, we need to invert the row as the origin is at the bottom
     const y = (rows - 1 - row) * tileSizeHeight
 
+    // Set x and y values to the cached reusable vec2
     reusableVec2.setX(x)
     reusableVec2.setY(y)
 

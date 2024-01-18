@@ -85,6 +85,7 @@ export default function Experience(){
                     clickToPlay
                     playOnLoad={false}
                     loop={false}
+                    allowRetrigger
                 />
             </Suspense>
             <Suspense>
