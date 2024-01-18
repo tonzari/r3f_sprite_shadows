@@ -9,18 +9,15 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     
     const texture = useLoader(TextureLoader, sprite)
     const plane = useRef()
-
     const msPerFrame = 1000 / fps
-
     const textureHeight = texture.source.data.height
     const textureWidth = texture.source.data.width
-
     const frameSize = {
         x: textureWidth / columnCount, 
         y: textureHeight / rowCount
     }
-
     const ratioHeightToWidth = frameSize.y/frameSize.x
+    const spriteTileCoords = new THREE.Vector2()
 
     let isPlaying = playOnLoad
     let currentFrame = startFrame
@@ -38,8 +35,8 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         if(props.onClick) { props.onClick(e) }
     }
 
-    function UpdateFrame() {       
-        texture.offset = getSpriteOffsetVec2(currentFrame, rowCount, columnCount)
+    function UpdateFrame() {  
+        texture.offset = getSpriteOffsetVec2(spriteTileCoords, currentFrame, rowCount, columnCount)
         
         if (currentFrame < endFrame) {
             currentFrame++
@@ -62,7 +59,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         texture.wrapS = THREE.RepeatWrapping
         texture.wrapt = THREE.RepeatWrapping
         texture.repeat.set(1/columnCount,1/rowCount)
-        texture.offset = getSpriteOffsetVec2(startFrame, rowCount, columnCount)
+        texture.offset = getSpriteOffsetVec2(spriteTileCoords, startFrame, rowCount, columnCount)
 
         // If parent passed a scale, use it
         const scaleMultiplier = props.scale ? props.scale : 1
@@ -79,8 +76,9 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
             plane.current.lookAt(state.camera.position)
         }
 
-        if(!isPlaying) return 
+        if(!isPlaying) return
 
+        // Determine frame rate indepent time to update sprite 
         if(window.performance.now() >= nextFrameTime) {
             UpdateFrame()
             nextFrameTime = window.performance.now() + msPerFrame
@@ -106,11 +104,14 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     );
 }
 
+// UTILITY FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
+// getSpriteOffsetVec2 can be called from useFrame!
+// so, set up a THREE.vector2 in outer scope to reuse and set within function, 
+// as opossed to re-creating the vec2
+// docs: https://docs.pmnd.rs/react-three-fiber/advanced/pitfalls#%E2%9C%85-better-re-use-object
 
-function getSpriteOffsetVec2(frameNumber, rows, columns) {
-    let result = new THREE.Vector2
-
+function getSpriteOffsetVec2(reusableVec2, frameNumber, rows, columns) {
     // Convert framePosition to zero-index
     const index = frameNumber - 1
 
@@ -129,8 +130,8 @@ function getSpriteOffsetVec2(frameNumber, rows, columns) {
     // For y, we need to invert the row as the origin is at the bottom
     const y = (rows - 1 - row) * tileSizeHeight
 
-    result.setX(x)
-    result.setY(y)
+    reusableVec2.setX(x)
+    reusableVec2.setY(y)
 
-    return result
+    return reusableVec2
 }

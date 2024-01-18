@@ -3,13 +3,14 @@ import { OrbitControls } from '@react-three/drei'
 import { Suspense, useRef } from 'react'
 import { Perf } from 'r3f-perf'
 import AnimatedSpriteMesh from './AnimatedSpriteMesh'
-import { PerspectiveCamera } from 'three'
-import RiveAsset from './RiveAsset'
+import { useControls } from 'leva'
 
 export default function Experience(){
 
     const pointLight = useRef()
     const pointLight2 = useRef()
+
+    const { bmoVisible } = useControls({ bmoVisible: true })
 
     let elapsedTime = 0
 
@@ -21,7 +22,7 @@ export default function Experience(){
 
     return(
         <>
-            <Perf />
+            <Perf position={'bottom-left'} />
 
             <OrbitControls />
 
@@ -73,6 +74,7 @@ export default function Experience(){
 
             <Suspense>
                 <AnimatedSpriteMesh
+                    visible={bmoVisible}
                     sprite={'/bmo.png'}
                     fps={24}
                     columnCount={14}
@@ -95,8 +97,6 @@ export default function Experience(){
                     position={[2,2,-1]}
                     scale={2}
                     loop={false}
-                    playOnLoad={false}
-                    clickToPlay
                 />
             </Suspense>
             <Suspense>
