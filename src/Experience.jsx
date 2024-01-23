@@ -3,14 +3,11 @@ import { OrbitControls } from '@react-three/drei'
 import { Suspense, useRef } from 'react'
 import { Perf } from 'r3f-perf'
 import AnimatedSpriteMesh from './AnimatedSpriteMesh'
-import { useControls } from 'leva'
 
 export default function Experience(){
 
     const pointLight = useRef()
     const pointLight2 = useRef()
-
-    const { bmoVisible } = useControls({ bmoVisible: true })
 
     let elapsedTime = 0
 
@@ -18,6 +15,7 @@ export default function Experience(){
         elapsedTime = state.clock.getElapsedTime()
         pointLight.current.position.x = Math.sin(elapsedTime * 0.2) * 8
         pointLight2.current.position.x = Math.sin(elapsedTime * 0.1) * 4
+        
     })
 
     return(
@@ -74,7 +72,6 @@ export default function Experience(){
 
             <Suspense>
                 <AnimatedSpriteMesh
-                    visible={bmoVisible}
                     sprite={'/bmo.png'}
                     fps={24}
                     columnCount={14}
@@ -127,7 +124,6 @@ export default function Experience(){
                     playOnLoad={false}
                     clickToPlay
                     loop={false}
-                    onClick={()=>{}}
                 />
             </Suspense>
              

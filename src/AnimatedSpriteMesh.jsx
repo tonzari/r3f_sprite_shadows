@@ -4,7 +4,7 @@ import { TextureLoader } from "three"
 import { useEffect, useRef } from 'react'
 
 export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, startFrame = 1, endFrame, fps = 12, loop = true, playOnLoad = true, clickToPlay = false, allowRetrigger = false, lookAtCam = false, alphaTest = 0.5, ...props}) {
-    
+    console.log("animated sprite mesh render")
     // VARIABLES - - - - - - - - - - - - - - - - - - - - 
     
     const texture = useLoader(TextureLoader, sprite)
@@ -29,7 +29,6 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
     texture.wrapt = THREE.RepeatWrapping
     texture.repeat.set(1/columnCount,1/rowCount)
     texture.offset = getSpriteOffsetVec2(spriteTileCoords, startFrame, rowCount, columnCount)
-    
     
     // FUNCTIONS - - - - - - - - - - - - - - - - - - - - 
 
@@ -61,7 +60,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
     // HOOKS - - - - - - - - - - - - - - - - - - - - - - 
 
-    // init
+    // 'start'
     useEffect(() => {
         plane.current.scale.set(
             scaleMultiplier,
@@ -70,7 +69,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         )
     }, []);
     
-    // update loop
+    // 'update'
     useFrame((state) => {
         if(lookAtCam) {
             plane.current.lookAt(state.camera.position)
@@ -104,7 +103,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
 
 // UTILITY FUNCTIONS - - - - - - - - - - - - - - - - - - - - - - - - - - - - 
 
-// getSpriteOffsetVec2 can be called from useFrame!
+// getSpriteOffsetVec2 is called from useFrame!
 // so, set up a THREE.vector2 in outer scope to reuse and set within function, 
 // as opossed to re-creating the vec2
 // docs: https://docs.pmnd.rs/react-three-fiber/advanced/pitfalls#%E2%9C%85-better-re-use-object
