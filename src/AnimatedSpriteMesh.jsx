@@ -56,6 +56,7 @@ export default function AnimatedSpriteMesh({sprite, columnCount, rowCount, start
         }
         
         isPlaying = false
+        texture.offset = getSpriteOffsetVec2(spriteTileCoords, startFrame, rowCount, columnCount)
     }
 
     // HOOKS - - - - - - - - - - - - - - - - - - - - - - 

@@ -57,12 +57,12 @@ export default function Experience(){
             <Suspense>
                 <AnimatedSpriteMesh
                     sprite={'/squidward.png'}
-                    fps={2}
+                    fps={12}
                     columnCount={8}
                     rowCount={3}
                     startFrame={1}
                     endFrame={18}
-                    loop={true}
+                    loop={false}
                     position={[0.5,0.7,0]}
                     scale={0.6}
                     onClick={()=>{console.log("squidward!")}}
